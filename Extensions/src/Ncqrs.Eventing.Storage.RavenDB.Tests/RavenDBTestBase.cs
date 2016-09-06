@@ -4,12 +4,13 @@ using log4net.Config;
 using NUnit.Framework;
 using Raven.Client.Document;
 using Raven.Client.Embedded;
+using Raven.Client;
 
 namespace Ncqrs.Eventing.Storage.RavenDB.Tests
 {
     public abstract class RavenDBTestBase
     {
-        protected DocumentStore _documentStore;
+        protected IDocumentStore _documentStore;
         private string path;
 
         [SetUp]
@@ -29,7 +30,7 @@ namespace Ncqrs.Eventing.Storage.RavenDB.Tests
             }
         }
 
-        private static DocumentStore ConnectToDocumentStore()
+        private static IDocumentStore ConnectToDocumentStore()
         {
             var documentStore = new DocumentStore
                                     {
@@ -39,7 +40,7 @@ namespace Ncqrs.Eventing.Storage.RavenDB.Tests
             return documentStore;
         }
 
-        private DocumentStore NewDocumentStore()
+        private IDocumentStore NewDocumentStore()
         {
             path = Path.GetDirectoryName(Assembly.GetAssembly(typeof(RavenDBEventStoreTests)).CodeBase);
             path = Path.Combine(path, "TestDb").Substring(6);
@@ -49,9 +50,11 @@ namespace Ncqrs.Eventing.Storage.RavenDB.Tests
                 Directory.Delete(path, true);
             }
             var documentStore = new EmbeddableDocumentStore
-                                    {
-                                        DataDirectory = path
-                                    };
+            {
+                DataDirectory = path
+            };
+
+
             documentStore.Initialize();
             return documentStore;
         }

@@ -18,19 +18,24 @@ namespace Ncqrs.Eventing.Storage.RavenDB
             }.Initialize(); 
         }
 
-        public RavenDBSnapshotStore(DocumentStore externalDocumentStore)
+       
+        public RavenDBSnapshotStore(IDocumentStore externalDocumentStore)
         {
-            externalDocumentStore.Conventions = CreateConventions();
+            //externalDocumentStore.Conventions = CreateConventions();
+            ConfigureConventions(externalDocumentStore.Conventions);
             _documentStore = externalDocumentStore;            
         }
 
+        private static DocumentConvention ConfigureConventions(DocumentConvention convention)
+        {
+            convention.JsonContractResolver = new PropertiesOnlyContractResolver();
+            convention.FindTypeTagName = x => "Snapshots";
+
+            return convention;
+        }
         private static DocumentConvention CreateConventions()
         {
-            return new DocumentConvention
-            {
-                JsonContractResolver = new PropertiesOnlyContractResolver(),
-                FindTypeTagName = x => "Snapshots"
-            };
+            return ConfigureConventions(new DocumentConvention());
         }
 
         public Snapshot GetSnapshot(Guid eventSourceId, long maxVersion)

@@ -5,6 +5,7 @@ using Raven.Client;
 using Raven.Client.Document;
 using Ncqrs.Eventing.Sourcing;
 
+
 namespace Ncqrs.Eventing.Storage.RavenDB
 {
     public class RavenDBEventStore : IEventStore
@@ -20,20 +21,33 @@ namespace Ncqrs.Eventing.Storage.RavenDB
             }.Initialize(); 
         }
 
-        public RavenDBEventStore(DocumentStore externalDocumentStore)
+        public RavenDBEventStore(IDocumentStore externalDocumentStore)
         {
-            externalDocumentStore.Conventions = CreateConventions();
-            _documentStore = externalDocumentStore;            
+            
+            //externalDocumentStore.Conventions = CreateConventions();
+            ConfigureConventions(externalDocumentStore.Conventions);
+            _documentStore = externalDocumentStore;
         }
+
+        private static DocumentConvention ConfigureConventions(DocumentConvention convention)
+        {
+            convention.JsonContractResolver = new PropertiesOnlyContractResolver();
+            convention.FindTypeTagName = x => "Events";
+            //convention.NewDocumentETagGenerator = GenerateETag
+
+            return convention;
+        }
+
 
         private static DocumentConvention CreateConventions()
         {
-            return new DocumentConvention
-            {
-                JsonContractResolver = new PropertiesOnlyContractResolver(),
-                FindTypeTagName = x => "Events"
-                //NewDocumentETagGenerator = GenerateETag
-            };
+            return ConfigureConventions(new DocumentConvention());
+            //return new DocumentConvention
+            //{
+            //    JsonContractResolver = new PropertiesOnlyContractResolver(),
+            //    FindTypeTagName = x => "Events"
+            //    //NewDocumentETagGenerator = GenerateETag
+            //};
         }
 
         private static Guid? GenerateETag(object entity)
@@ -94,12 +108,19 @@ namespace Ncqrs.Eventing.Storage.RavenDB
 
         private static StoredEvent ToStoredEvent(Guid commitId, UncommittedEvent uncommittedEvent)
         {
+            // Assing all values explicityl otherwise they get set to -1 which fails on deserialization
+            var version = new Version(
+                uncommittedEvent.EventVersion.Major>0 ? uncommittedEvent.EventVersion.Major : 0,
+                uncommittedEvent.EventVersion.Minor > 0 ? uncommittedEvent.EventVersion.Minor : 0,
+                uncommittedEvent.EventVersion.Build > 0 ? uncommittedEvent.EventVersion.Build : 0,
+                uncommittedEvent.EventVersion.Revision > 0 ? uncommittedEvent.EventVersion.Revision : 0);
+
             return new StoredEvent
                        {
                            Id = uncommittedEvent.EventSourceId + "/" + uncommittedEvent.EventSequence,
                            EventIdentifier = uncommittedEvent.EventIdentifier,
                            EventTimeStamp = uncommittedEvent.EventTimeStamp,
-                           Version = uncommittedEvent.EventVersion,
+                           Version = version,
                            CommitId = commitId,
                            Data = uncommittedEvent.Payload,
                            EventSequence = uncommittedEvent.EventSequence,

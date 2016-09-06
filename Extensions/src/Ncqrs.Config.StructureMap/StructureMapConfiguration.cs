@@ -20,6 +20,7 @@ namespace Ncqrs.Config.StructureMap
     /// </code>
     public class StructureMapConfiguration : IEnvironmentConfiguration
     {
+        
         /// <summary>
         /// Initializes a new instance of the <see cref="StructureMapConfiguration"/> class.
         /// </summary>
@@ -29,6 +30,7 @@ namespace Ncqrs.Config.StructureMap
         ///  <remarks>If this is not <c>null</c> the <c>ObjectFactory.Configure</c> method will be called it this expression.</remarks></param>
         public StructureMapConfiguration(Action<IInitializationExpression> initialization = null, Action<ConfigurationExpression> configuration = null)
         {
+
             if (initialization != null)
             {
                 ObjectFactory.Initialize(initialization);
@@ -48,7 +50,9 @@ namespace Ncqrs.Config.StructureMap
         public bool TryGet<T>(out T result) where T : class
         {
             result = default(T);
-            var foundInstance = ObjectFactory.TryGetInstance<T>();
+
+            //Blair
+            var foundInstance = ObjectFactory.GetInstance<T>();
 
             if (foundInstance != null)
             {
