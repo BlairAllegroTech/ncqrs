@@ -37,8 +37,8 @@ namespace Ncqrs.Tests.Eventing.Storage
 
             var bag = new PropertyBag("testing");
             bag.AddPropertyValue(thePropName, thePropValue);
-
-            bag.Properties.Should().Contain(p => p.Key == thePropName && (String)p.Value == thePropValue);
+            //Blair (p.Key == thePropName && (String)p.Value == thePropValue)
+            bag.Properties.Should().Contain(thePropName, thePropValue);
         }
 
         [Test]
