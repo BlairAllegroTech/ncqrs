@@ -9,7 +9,7 @@ namespace Ncqrs.Eventing.Storage.NoDB.Tests.EventStoreTests
     {
         private object [] _returnedEvents;
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void SetUp()
         {
             BaseSetup();

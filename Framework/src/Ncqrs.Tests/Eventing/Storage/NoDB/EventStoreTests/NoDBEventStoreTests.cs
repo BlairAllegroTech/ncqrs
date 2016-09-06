@@ -11,14 +11,19 @@ namespace Ncqrs.Eventing.Storage.NoDB.Tests.EventStoreTests
     [Category("Integration")]
     public abstract class NoDBEventStoreTestFixture
     {
+        protected string rootPath;
         protected NoDBEventStore EventStore;
         protected object[] Events;
         protected Guid EventSourceId;
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void BaseSetup()
         {
-            EventStore = new NoDBEventStore("./NoDBTests/"+GetType().Name);
+            var uri = new Uri(this.GetType().Assembly.CodeBase);
+            rootPath = Path.GetDirectoryName(uri.LocalPath);
+
+            var path = Path.Combine(rootPath, "NoDBTests", GetType().Name);
+            EventStore = new NoDBEventStore(path);
             EventSourceId = Guid.NewGuid();
             Guid entityId = Guid.NewGuid();
             Events = new object[] {new AccountTitleChangedEvent("Title")};
@@ -27,7 +32,7 @@ namespace Ncqrs.Eventing.Storage.NoDB.Tests.EventStoreTests
             EventStore.Store(eventStream);
         }
 
-        [TestFixtureTearDown]
+        [OneTimeTearDown]
         public void TearDown()
         {
             Directory.Delete(GetPath(), true);
@@ -35,7 +40,9 @@ namespace Ncqrs.Eventing.Storage.NoDB.Tests.EventStoreTests
 
         protected string GetPath()
         {
-            return "./NoDBTests/" + GetType().Name+"/"+EventSourceId.ToString().Substring(0, 2);
+            var path = Path.Combine(rootPath, "NoDBTests", GetType().Name, EventSourceId.ToString().Substring(0, 2) );
+            //return "./NoDBTests/" + GetType().Name+"/"+EventSourceId.ToString().Substring(0, 2);
+            return path;
         }
     }
 }
