@@ -25,7 +25,8 @@ namespace Ncqrs.Eventing.Storage.SQLite.Tests{
         [TearDown]
         public void Teardown()
         {
-            File.Delete(_path);
+            if(File.Exists(_path))
+                File.Delete(_path);
         }
 
         private string _path;
