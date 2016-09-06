@@ -17,11 +17,14 @@ namespace Ncqrs.Eventing.Sourcing.Snapshotting.DynamicSnapshot.Tests
 
         private const string OriginalTitle = "OriginalTitle";
 
-        private const string SerializedSnapshotFileName = "snapshot.bin";
+        private const string SnapShotFileName = "snapshot.bin";
+        private string SerializedSnapshotFileName;
 
         private IWindsorContainer _container;
 
         private readonly Guid AssemblyVersionGuid = Guid.Parse("938bab08-4f95-430f-b1b7-2200ae4085d5");
+
+        
 
         [Test]
         public void CanBuildDynamicSnapshotAssembly()
@@ -86,18 +89,23 @@ namespace Ncqrs.Eventing.Sourcing.Snapshotting.DynamicSnapshot.Tests
             Assert.AreEqual(OriginalTitle, proxy.Tittle);
         }
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void SetUp()
         {
             System.Diagnostics.Debug.Write("Initializing Windsor container...");
-            var target = Assembly.LoadFrom("Ncqrs.Eventing.Sourcing.Snapshotting.DynamicSnapshot.Tests.dll");
+
+
+            SerializedSnapshotFileName = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, SnapShotFileName);
+
+            //var target = Assembly.LoadFrom("Ncqrs.Eventing.Sourcing.Snapshotting.DynamicSnapshot.Tests.dll");
+            var target = this.GetType().Assembly;
             _container = new WindsorContainer();
-            _container.AddFacility("Ncqrs.DynamicSnapshot", new DynamicSnapshotFacility(target));
+            _container.AddFacility("Ncqrs.DynamicSnapshot", new DynamicSnapshotFacility(target, AppDomain.CurrentDomain.BaseDirectory));
             _container.Register(Component.For<Foo>().AsSnapshotable());
             System.Diagnostics.Debug.WriteLine("Done!");
         }
 
-        [TestFixtureTearDown]
+        [OneTimeTearDown]
         public void TestFixtureTearDown()
         {
             if (File.Exists(SerializedSnapshotFileName))
@@ -119,7 +127,7 @@ namespace Ncqrs.Eventing.Sourcing.Snapshotting.DynamicSnapshot.Tests
             AppDomain.CurrentDomain.AssemblyResolve += (sender, eventArgs) =>
             {
                 if (eventArgs.Name.Contains("DynamicSnapshot"))
-                    return Assembly.LoadFrom("DynamicSnapshot.dll");
+                    return Assembly.LoadFrom( Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "DynamicSnapshot.dll") );
                 return null;
             };
 

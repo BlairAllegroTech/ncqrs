@@ -8,21 +8,26 @@ namespace Ncqrs.Eventing.Storage.NoDB.Tests.SnapshotStoreTests
 {
     public class NoDBSnapshotStoreTestFixture
     {
+        protected string rootPath;
         protected NoDBSnapshotStore SnapshotStore;
         protected Snapshot Snapshot;
 
-        [TestFixtureSetUp]
+
+        [OneTimeSetUp]
         public void BaseSetup()
         {
-            SnapshotStore = new NoDBSnapshotStore("");
+            var uri = new Uri(this.GetType().Assembly.CodeBase);
+            rootPath = Path.GetDirectoryName(uri.LocalPath);
+
+            SnapshotStore = new NoDBSnapshotStore(rootPath);
         }
 
-        [TestFixtureTearDown]
+        [OneTimeTearDown]
         public void BaseTearDown()
         {
             if (Snapshot != null)
             {
-                var foldername = Snapshot.EventSourceId.ToString().Substring(0, 2);
+                var foldername = Path.Combine(rootPath, Snapshot.EventSourceId.ToString().Substring(0, 2));
                 if (Directory.Exists(foldername))
                     Directory.Delete(foldername, true);
             }

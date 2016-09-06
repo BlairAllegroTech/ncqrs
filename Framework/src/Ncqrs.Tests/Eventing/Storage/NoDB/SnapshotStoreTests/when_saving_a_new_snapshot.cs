@@ -13,11 +13,11 @@ namespace Ncqrs.Eventing.Storage.NoDB.Tests.SnapshotStoreTests
         private string _foldername;
         private string _filename;
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void SetUp()
         {
             Snapshot = new Snapshot(Guid.NewGuid(), 1, new TestSnapshot { Name = "TestName"});
-            _foldername = Snapshot.EventSourceId.ToString().Substring(0, 2);
+            _foldername = Path.Combine(rootPath, Snapshot.EventSourceId.ToString().Substring(0, 2));
             _filename = Snapshot.EventSourceId.ToString().Substring(2) + ".ss";
             SnapshotStore.SaveSnapshot(Snapshot);
         }

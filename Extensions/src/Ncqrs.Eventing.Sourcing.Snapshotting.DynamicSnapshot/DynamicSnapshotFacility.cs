@@ -11,6 +11,7 @@ namespace Ncqrs.Eventing.Sourcing.Snapshotting.DynamicSnapshot
     /// </summary>
     public class DynamicSnapshotFacility : AbstractFacility
     {
+        private string _basePath;
         private readonly Assembly _assemblyWithAggreagateRoots;
 
         private readonly bool _generateDynamicSnapshotAssembly;
@@ -19,8 +20,8 @@ namespace Ncqrs.Eventing.Sourcing.Snapshotting.DynamicSnapshot
         /// Initializes a new instance of the <see cref="DynamicSnapshotFacility"/> class.
         /// </summary>
         /// <param name="assemblyName">The assembly name with aggregate roots.</param>
-        public DynamicSnapshotFacility(string assemblyName)
-            : this(Assembly.Load(assemblyName))
+        public DynamicSnapshotFacility(string assemblyName, string basePath = null)
+            : this(Assembly.Load(assemblyName), basePath)
         { }
 
         /// <summary>
@@ -36,9 +37,10 @@ namespace Ncqrs.Eventing.Sourcing.Snapshotting.DynamicSnapshot
         /// Initializes a new instance of the <see cref="DynamicSnapshotFacility"/> class.
         /// </summary>
         /// <param name="assemblyWithAggregateRoots">The assembly with aggregate roots.</param>
-        public DynamicSnapshotFacility(Assembly assemblyWithAggregateRoots)
-            : this(assemblyWithAggregateRoots, true)
+        public DynamicSnapshotFacility(Assembly assemblyWithAggregateRoots, string basePath = null)
+            : this(assemblyWithAggregateRoots, true, basePath)
         {
+            
         }
 
         /// <summary>
@@ -46,10 +48,16 @@ namespace Ncqrs.Eventing.Sourcing.Snapshotting.DynamicSnapshot
         /// </summary>
         /// <param name="assemblyWithAggregateRoots">The assembly with aggregate roots.</param>
         /// <param name="generateDynamicSnapshotAssembly">if set to <c>true</c> [generates dynamic snapshot assembly]. Default:<c>true</c></param>
-        public DynamicSnapshotFacility(Assembly assemblyWithAggregateRoots, bool generateDynamicSnapshotAssembly)
+        public DynamicSnapshotFacility(Assembly assemblyWithAggregateRoots, bool generateDynamicSnapshotAssembly, string basePath = null)
         {
             _generateDynamicSnapshotAssembly = generateDynamicSnapshotAssembly;
             _assemblyWithAggreagateRoots = assemblyWithAggregateRoots;
+
+            if (basePath != null)
+            {
+                var uri = new Uri(assemblyWithAggregateRoots.CodeBase);
+                _basePath = System.IO.Path.GetDirectoryName(uri.LocalPath);
+            }
         }
 
         protected override void Init()
@@ -73,7 +81,11 @@ namespace Ncqrs.Eventing.Sourcing.Snapshotting.DynamicSnapshot
                                 instance.CreateAssemblyFrom(_assemblyWithAggreagateRoots);
                         }),
                 Component.For<SnapshotableAggregateRootFactory>(),
-                Component.For<DynamicSnapshotAssemblyBuilder>(),
+                Component.For<DynamicSnapshotAssemblyBuilder>()
+                    .DynamicParameters((kernel, parameters) => 
+                    {
+                        parameters["basePath"] = _basePath;
+                    }),
                 Component.For<DynamicSnapshotTypeBuilder>(),
                 Component.For<SnapshotableImplementerFactory>());
         }
