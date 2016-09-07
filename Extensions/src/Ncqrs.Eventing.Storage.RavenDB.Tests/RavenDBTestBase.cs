@@ -50,11 +50,10 @@ namespace Ncqrs.Eventing.Storage.RavenDB.Tests
                 Directory.Delete(path, true);
             }
             var documentStore = new EmbeddableDocumentStore
-            {
-                DataDirectory = path
-            };
-
-
+                                    {
+                                        DataDirectory = path,
+                                        Conventions = new DocumentConvention()
+                                    };
             documentStore.Initialize();
             return documentStore;
         }

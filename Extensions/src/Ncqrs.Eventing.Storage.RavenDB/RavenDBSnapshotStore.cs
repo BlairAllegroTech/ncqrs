@@ -2,6 +2,7 @@
 using Raven.Client;
 using Raven.Client.Document;
 using Ncqrs.Eventing.Sourcing.Snapshotting;
+using Raven.Imports.Newtonsoft.Json.Converters;
 
 namespace Ncqrs.Eventing.Storage.RavenDB
 {
@@ -13,29 +14,25 @@ namespace Ncqrs.Eventing.Storage.RavenDB
         {
             _documentStore = new DocumentStore
             {
-                Url = ravenUrl,                
-                Conventions = CreateConventions()
+                Url = ravenUrl,
+                Conventions = SetConventions(new DocumentConvention())
             }.Initialize(); 
         }
 
-       
         public RavenDBSnapshotStore(IDocumentStore externalDocumentStore)
         {
-            //externalDocumentStore.Conventions = CreateConventions();
-            ConfigureConventions(externalDocumentStore.Conventions);
+            SetConventions(externalDocumentStore.Conventions);
             _documentStore = externalDocumentStore;            
         }
 
-        private static DocumentConvention ConfigureConventions(DocumentConvention convention)
+        private DocumentConvention SetConventions(DocumentConvention convention)
         {
             convention.JsonContractResolver = new PropertiesOnlyContractResolver();
             convention.FindTypeTagName = x => "Snapshots";
-
+            convention.CustomizeJsonSerializer = serializer => {
+                serializer.Converters.Add(new VersionConverter());
+            };
             return convention;
-        }
-        private static DocumentConvention CreateConventions()
-        {
-            return ConfigureConventions(new DocumentConvention());
         }
 
         public Snapshot GetSnapshot(Guid eventSourceId, long maxVersion)

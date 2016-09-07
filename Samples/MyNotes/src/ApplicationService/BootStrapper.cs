@@ -32,7 +32,7 @@ namespace ApplicationService
 
             Assembly asm = Assembly.LoadFrom("Domain.dll");
             IWindsorContainer container = new WindsorContainer();
-            container.AddFacility("ncqrs.ds", new DynamicSnapshotFacility(asm));
+            container.AddFacility(new DynamicSnapshotFacility(asm, ".\\Dynamic")); //"ncqrs.ds", 
             container.Register(
                 Component.For<ISnapshottingPolicy>().ImplementedBy<SimpleSnapshottingPolicy>(),
                 Component.For<ICommandService>().Instance(InitializeCommandService()),

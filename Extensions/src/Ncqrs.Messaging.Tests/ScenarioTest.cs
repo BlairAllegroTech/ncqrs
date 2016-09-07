@@ -1,8 +1,7 @@
 ﻿using System;
-using Ncqrs.Domain;
-using Ncqrs.Eventing.ServiceModel.Bus;
 using NUnit.Framework;
-using Ncqrs.Eventing.Sourcing;
+using Ncqrs.Eventing.ServiceModel.Bus;
+using Ncqrs.Domain;
 
 namespace Ncqrs.Messaging.Tests
 {

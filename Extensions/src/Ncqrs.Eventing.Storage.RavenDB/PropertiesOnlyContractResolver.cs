@@ -1,21 +1,14 @@
-﻿using System;
+﻿using Raven.Imports.Newtonsoft.Json.Serialization;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-
-// blair
 //using Newtonsoft.Json.Serialization;
-using Raven.Imports.Newtonsoft.Json.Serialization;
 
 namespace Ncqrs.Eventing.Storage.RavenDB
 {
     public class PropertiesOnlyContractResolver : DefaultContractResolver
     {
-        public PropertiesOnlyContractResolver()
-        {
-            // Blair
-            //DefaultMembersSearchFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
-        }
 
         protected override List<MemberInfo> GetSerializableMembers(Type objectType)
         {

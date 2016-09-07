@@ -19,9 +19,6 @@ namespace Ncqrs.Eventing.Storage.SQLite
             using (var connection = Connection)
             {
                 action(connection);
-
-                //Blair
-                Connection = null;
             }
         }
 
@@ -46,21 +43,12 @@ namespace Ncqrs.Eventing.Storage.SQLite
         {
             get
             {
-                _connection = _connection ?? new SQLiteConnection(_connectionString);
-
+                _connection = new SQLiteConnection(_connectionString);
+                
                 if (_connection.State != ConnectionState.Open)
                     _connection.Open();
 
-                return _connection;
-            }
-            set
-            {
-                // blair
-                if(_connection!=null)
-                {
-                    _connection.Dispose();
-                    _connection = null;
-                }
+                return  _connection;
             }
         }
     }

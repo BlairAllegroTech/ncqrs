@@ -2,19 +2,17 @@ using System;
 using System.IO;
 using Ncqrs.Eventing.Sourcing.Snapshotting;
 using Newtonsoft.Json.Linq;
-using NUnit.Framework;
+using Xunit;
 
 namespace Ncqrs.Eventing.Storage.NoDB.Tests.SnapshotStoreTests
 {
-    public class NoDBSnapshotStoreTestFixture
+    public class NoDBSnapshotStoreTestFixture: IDisposable
     {
         protected string rootPath;
         protected NoDBSnapshotStore SnapshotStore;
-        protected Snapshot Snapshot;
+        public Snapshot Snapshot;
 
-
-        [OneTimeSetUp]
-        public void BaseSetup()
+        public  NoDBSnapshotStoreTestFixture()
         {
             var uri = new Uri(this.GetType().Assembly.CodeBase);
             rootPath = Path.GetDirectoryName(uri.LocalPath);
@@ -22,8 +20,7 @@ namespace Ncqrs.Eventing.Storage.NoDB.Tests.SnapshotStoreTests
             SnapshotStore = new NoDBSnapshotStore(rootPath);
         }
 
-        [OneTimeTearDown]
-        public void BaseTearDown()
+        public void Dispose()
         {
             if (Snapshot != null)
             {
@@ -31,7 +28,6 @@ namespace Ncqrs.Eventing.Storage.NoDB.Tests.SnapshotStoreTests
                 if (Directory.Exists(foldername))
                     Directory.Delete(foldername, true);
             }
-
         }
     }
 

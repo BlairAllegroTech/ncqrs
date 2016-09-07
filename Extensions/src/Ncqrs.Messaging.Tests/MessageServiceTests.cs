@@ -124,11 +124,14 @@ namespace Ncqrs.Messaging.Tests
 
         public class Receiver : MessagingAggregateRoot, IMessageHandler<TestMessage>
         {
-            // Blair not sure how this ever worked ?
-            //http://stackoverflow.com/questions/12113131/c-sharp-activator-createinstance-for-extending-class
-            public Receiver() : base() { }
+            public Receiver():base()
+            {
 
-            public Receiver(Guid id) : base(id){ }
+            }
+            public Receiver(Guid Id):base(Id)
+            {
+
+            }
 
             void IMessageHandler<TestMessage>.Handle(TestMessage testMessage)
             {
